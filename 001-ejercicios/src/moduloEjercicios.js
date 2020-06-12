@@ -1,4 +1,4 @@
-import basededatos from './basededatos';
+import basededatos, { database } from './basededatos';
 
 /**
  * Obtiene la lista de materias aprobadas (nota >= 4) para el nombre de alumno dado.
@@ -21,10 +21,17 @@ import basededatos from './basededatos';
   ]
  * @param {nombreAlumno} nombreAlumno
  */
+
 export const materiasAprobadasByNombreAlumno = (nombreAlumno) => {
-  // Ejemplo de como accedo a datos dentro de la base de datos
-  // console.log(basededatos.alumnos);
-  return [];
+	const idAlumno = basededatos.alumnos.find((alumno) => alumno.nombre === nombreAlumno).id;
+	const getMateriasByIdAlumno = basededatos.calificaciones
+		.filter((c) => c.alumno === idAlumno && c.nota >= 4)
+		.map(
+			( {materia} ) =>
+				 basededatos.materias.find(
+					 (m) => m.id === materia));
+
+	return getMateriasByIdAlumno;
 };
 
 /**
@@ -68,8 +75,25 @@ export const materiasAprobadasByNombreAlumno = (nombreAlumno) => {
     }
  * @param {string} nombreUniversidad
  */
+
 export const expandirInfoUniversidadByNombre = (nombreUniversidad) => {
-  return {};
+	let materiaCalificacion;
+	let universidad = basededatos.universidades.find((element) => element.nombre === nombreUniversidad);
+	universidad.materias = basededatos.materias.filter((materia) => universidad.id === materia.universidad);
+	universidad.profesores = [];
+	universidad.alumnos = [];
+
+	universidad.materias.forEach((materia) => {
+		materia.profesores.forEach((prof) => {
+			universidad.profesores.push(basededatos.profesores.find((element) => prof === element.id));
+    });
+    materiaCalificacion = basededatos.calificaciones.filter ((element)=> element.materia === materia.id)
+		materiaCalificacion.forEach( (matCalificacion) => {
+			universidad.alumnos.push ( basededatos.alumnos.find((alumno)=> matCalificacion.alumno === alumno.id))
+		})
+	});
+
+	return universidad;
 };
 
 // /**
